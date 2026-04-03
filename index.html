@@ -113,6 +113,61 @@
             background-size: 40px 40px;
         }
 
+        /* ── Skala och mått – split workspace grid backgrounds ── */
+        #scale-workspace-left,
+        #scale-workspace-right {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='%23b8d4f0' stroke-width='0.8'/%3E%3C/svg%3E");
+            background-size: 40px 40px;
+            overflow: auto;
+        }
+
+        /* Scale sidebar button style */
+        .scale-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 8px 10px; border-radius: 10px;
+            border: 2px solid transparent; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            width: 100%;
+        }
+        .scale-btn:hover { transform: translateY(-1px); }
+        .scale-btn.active {
+            border-color: #5b80a5;
+            box-shadow: 0 0 0 3px rgba(91,128,165,0.25);
+        }
+
+        /* Section labels inside each workspace half */
+        .scale-side-label {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.88); border: 1.5px solid #cde0f5;
+            border-radius: 8px; padding: 3px 14px;
+            font-size: 13px; font-weight: 800; color: #3a5f80;
+            pointer-events: none; z-index: 10; white-space: nowrap;
+        }
+
+        /* Top-right scale info overlay (presentation mode) */
+        #scale-info-overlay {
+            position: absolute; top: 14px; right: 14px;
+            background: #1e3a5f; color: #fff;
+            border-radius: 14px; padding: 14px 22px;
+            font-size: 22px; font-weight: 900; line-height: 1.3;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+            z-index: 50; pointer-events: none;
+            text-align: center; min-width: 190px;
+            transition: opacity 0.2s;
+        }
+        #scale-info-overlay .scale-overlay-sub {
+            font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 3px;
+        }
+
+        /* Highlight ring on original when hovering scaled */
+        .scale-highlight-ring {
+            position: absolute; border-radius: 6px;
+            border: 3px solid #f5a623;
+            box-shadow: 0 0 0 5px rgba(245,166,35,0.25);
+            pointer-events: none; z-index: 20;
+            transition: opacity 0.15s;
+        }
+
         /* ── Positionssystem – column headers & dividers ── */
         .pos-col-header { position:absolute; top:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; height:40px; pointer-events:none; z-index:5; box-sizing:border-box; border-bottom-width:2px; border-bottom-style:solid; }
         .pos-col-divider { position:absolute; top:0; bottom:0; width:1px; pointer-events:none; z-index:4; }
@@ -415,6 +470,11 @@
                         <div class="w-20 h-20 rounded-full bg-soft-tealLight/30 text-soft-teal flex items-center justify-center text-3xl group-hover:scale-110 transition-transform"><i class="fas fa-arrows-left-right"></i></div>
                         <h3 class="text-xl font-bold text-soft-text">Decimaltal</h3>
                         <p class="text-soft-muted text-center text-sm">Utforska positionsvärde och flytta siffror vid multiplikation och division med 10.</p>
+                    </button>
+                    <button onclick="switchView('scale')" class="bg-soft-surface p-8 rounded-2xl shadow-sm hover:shadow-md border border-soft-border flex flex-col items-center justify-center gap-4 transition-all hover:-translate-y-1 group">
+                        <div class="w-20 h-20 rounded-full bg-soft-blueLight/30 text-soft-blue flex items-center justify-center text-3xl group-hover:scale-110 transition-transform"><i class="fas fa-ruler-combined"></i></div>
+                        <h3 class="text-xl font-bold text-soft-text">Skala och mått</h3>
+                        <p class="text-soft-muted text-center text-sm">Utforska förstoring och förminskning med skalor och jämför verklighet med ritning.</p>
                     </button>
                 </div>
             </div>
@@ -1261,6 +1321,72 @@
             </div><!-- /workspace-decimaltal -->
         </section>
 
+        <!-- ═══════════════ SKALA OCH MÅTT VIEW ═══════════════ -->
+        <section id="view-scale" class="view-section flex-row h-full">
+
+            <!-- Float panel for presentation/fullscreen mode -->
+            <div id="scale-float-panel" class="view-float-panel">
+                <button onclick="toggleViewSidebar('scale')" aria-expanded="false"
+                    class="view-float-btn bg-white border border-soft-border rounded-xl px-3 py-2 text-sm font-bold text-soft-blue flex items-center gap-2 shadow-lg hover:bg-soft-blueLight/10 transition-colors"
+                    title="Visa/dölj kontroller">
+                    <i class="fas fa-sliders-h text-base"></i><span id="scale-ctrl-lbl">Kontroller</span>
+                </button>
+            </div>
+
+            <!-- Sidebar with scale controls -->
+            <div id="scale-sidebar" data-view-panel="side"
+                class="w-56 bg-soft-surface shadow-md z-10 p-4 flex flex-col gap-3 overflow-y-auto border-r border-soft-border shrink-0">
+
+                <p class="text-xs font-800 text-soft-muted uppercase tracking-widest mt-1">Förminskning</p>
+                <button onclick="scale_setScale(1,2)"  id="scale-btn-1-2"   class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:2</button>
+                <button onclick="scale_setScale(1,5)"  id="scale-btn-1-5"   class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:5</button>
+                <button onclick="scale_setScale(1,10)" id="scale-btn-1-10"  class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:10</button>
+                <button onclick="scale_setScale(1,100)"id="scale-btn-1-100" class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:100</button>
+
+                <hr class="border-soft-border my-1">
+                <p class="text-xs font-800 text-soft-muted uppercase tracking-widest">Förstoring</p>
+                <button onclick="scale_setScale(2,1)"  id="scale-btn-2-1"   class="scale-btn bg-soft-greenLight/20 text-soft-green">2:1</button>
+                <button onclick="scale_setScale(5,1)"  id="scale-btn-5-1"   class="scale-btn bg-soft-greenLight/20 text-soft-green">5:1</button>
+                <button onclick="scale_setScale(10,1)" id="scale-btn-10-1"  class="scale-btn bg-soft-greenLight/20 text-soft-green">10:1</button>
+
+                <hr class="border-soft-border my-1">
+                <button onclick="scale_setScale(1,1)"  id="scale-btn-1-1"   class="scale-btn bg-soft-surface border border-soft-border text-soft-text">1:1 (Återställ)</button>
+
+                <div class="mt-auto pt-3 border-t border-soft-border text-xs text-soft-muted text-center">
+                    Mått: <span id="scale-unit-label" class="font-bold text-soft-text">cm</span>
+                </div>
+            </div>
+
+            <!-- Main split workspace -->
+            <div class="flex-1 flex flex-row relative overflow-hidden">
+
+                <!-- Left half – Verklighet (original) -->
+                <div class="flex-1 relative" id="scale-workspace-left">
+                    <div class="scale-side-label">Verklighet</div>
+                    <div id="scale-highlight-ring" class="scale-highlight-ring" style="display:none;"></div>
+                    <canvas id="scale-canvas-left" style="position:absolute;top:0;left:0;display:block;"></canvas>
+                </div>
+
+                <!-- Vertical divider -->
+                <div class="w-px bg-soft-border shrink-0"></div>
+
+                <!-- Right half – Ritning / Skala (scaled copy) -->
+                <div class="flex-1 relative" id="scale-workspace-right">
+                    <div class="scale-side-label" id="scale-right-label">Ritning / Skala</div>
+                    <canvas id="scale-canvas-right" style="position:absolute;top:0;left:0;display:block;"
+                        onmouseenter="scale_onHoverRight(true)"
+                        onmouseleave="scale_onHoverRight(false)"></canvas>
+                </div>
+
+                <!-- Presentation info overlay (top-right of main area) -->
+                <div id="scale-info-overlay">
+                    <div id="scale-overlay-ratio">Skala 1:1</div>
+                    <div class="scale-overlay-sub" id="scale-overlay-type">—</div>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
     <script>
@@ -1301,6 +1427,7 @@
         koordinat:  { onEnter: renderKoord,            onResize: renderKoord },
         volym:      { onEnter: updateVolumeUI },
         decimaltal: { onEnter: decOnEnter,         onResize: () => { decPositionTokens(false); decRenderNL(); } },
+        scale:      { onEnter: scale_onEnter,       onResize: scale_onEnter },
     };
 
     /**
@@ -1326,7 +1453,7 @@
             cleanup3D();
         } else {
             btnHome.classList.remove('hidden');
-            const titles = {fractions:'Bråk',numberlines:'Tallinjer',geometry:'Geometriska objekt',counting:'Räkning',clock:'Klockan',statistics:'Statistik',koordinat:'Koordinatsystem',positionssystem:'Positionssystemet',volym:'Volym',decimaltal:'Decimaltal'};
+            const titles = {fractions:'Bråk',numberlines:'Tallinjer',geometry:'Geometriska objekt',counting:'Räkning',clock:'Klockan',statistics:'Statistik',koordinat:'Koordinatsystem',positionssystem:'Positionssystemet',volym:'Volym',decimaltal:'Decimaltal',scale:'Skala och mått'};
             title.innerText = titles[viewId];
             // Run the view's onEnter hook if registered
             const onEnter = VIEW_REGISTRY[viewId]?.onEnter;
@@ -1342,7 +1469,8 @@
                 koordinat: 'bg-soft-purple text-white',
                 positionssystem: 'bg-soft-blue text-white',
                 volym: 'bg-soft-blue text-white',
-                decimaltal: 'bg-soft-teal text-white'
+                decimaltal: 'bg-soft-teal text-white',
+                scale:      'bg-soft-blue text-white'
             };
             const colorCls = fsBtnColors[viewId] || 'bg-soft-blue text-white';
             document.getElementById('controls-area').innerHTML =
@@ -5223,6 +5351,249 @@
     }
 
     window.onload = initApp;
+
+    // ===================== SKALA OCH MÅTT MODULE =====================
+    // All identifiers use the meas_ / scale_ prefix to avoid collisions.
+
+    /** Grid cell size in pixels (1 cm at standard screen DPI). */
+    const SCALE_CELL_PX = 40;
+
+    /**
+     * Original object dimensions in centimetres.
+     * A 5×4 cm rectangle gives enough resolution for the reduction scales.
+     */
+    const SCALE_OBJ_W_CM = 5;
+    const SCALE_OBJ_H_CM = 4;
+
+    /** Scale state – numerator:denominator (e.g. 1:2 means numerator=1, denominator=2). */
+    let scale_numerator   = 1;
+    let scale_denominator = 1;
+
+    /** Future-proofing: active measurement unit (not yet interactive in Step 1). */
+    let scale_currentUnit = 'cm';
+
+    /** True while the pointer is hovering over the right (scaled) canvas. */
+    let scale_hovering = false;
+
+    /**
+     * Called when the Scale view becomes active (VIEW_REGISTRY onEnter / onResize).
+     * Sizes both canvases to fill their parent containers, then draws.
+     */
+    function scale_onEnter() {
+        const leftEl  = document.getElementById('scale-workspace-left');
+        const rightEl = document.getElementById('scale-workspace-right');
+        const cL = document.getElementById('scale-canvas-left');
+        const cR = document.getElementById('scale-canvas-right');
+        if (!leftEl || !cL) return;
+        cL.width  = leftEl.clientWidth;
+        cL.height = leftEl.clientHeight;
+        cR.width  = rightEl.clientWidth;
+        cR.height = rightEl.clientHeight;
+        scale_draw();
+    }
+
+    /**
+     * Select a scale.
+     * @param {number} num - Numerator of the scale ratio.
+     * @param {number} den - Denominator of the scale ratio.
+     */
+    function scale_setScale(num, den) {
+        scale_numerator   = num;
+        scale_denominator = den;
+        // Update active button styling
+        document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+        const id = `scale-btn-${num}-${den}`;
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.add('active');
+        scale_draw();
+    }
+
+    /**
+     * Draw both canvases: the original on the left and the scaled version on the right.
+     * Also updates the presentation overlay.
+     */
+    function scale_draw() {
+        const factor = scale_numerator / scale_denominator;
+
+        // ── Left canvas (Verklighet – always 1:1) ──
+        scale_drawSide(
+            document.getElementById('scale-canvas-left'),
+            SCALE_CELL_PX,
+            SCALE_OBJ_W_CM,
+            SCALE_OBJ_H_CM,
+            scale_hovering,   // highlight when mouse is over the right side
+            '#5b80a5'         // fill colour – soft blue
+        );
+
+        // ── Right canvas (Ritning / Skala) ──
+        scale_drawSide(
+            document.getElementById('scale-canvas-right'),
+            SCALE_CELL_PX,
+            SCALE_OBJ_W_CM * factor,
+            SCALE_OBJ_H_CM * factor,
+            false,
+            scale_denominator > scale_numerator ? '#2E7D32' : (scale_numerator > scale_denominator ? '#C62828' : '#5b80a5')
+        );
+
+        // ── Update presentation overlay ──
+        const ratioText = `Skala ${scale_numerator}:${scale_denominator}`;
+        let typeText;
+        if (scale_numerator < scale_denominator)       typeText = 'Förminskning';
+        else if (scale_numerator > scale_denominator)  typeText = 'Förstoring';
+        else                                           typeText = '—';
+
+        const overlayRatio = document.getElementById('scale-overlay-ratio');
+        const overlayType  = document.getElementById('scale-overlay-type');
+        const rightLabel   = document.getElementById('scale-right-label');
+        if (overlayRatio) overlayRatio.textContent = ratioText;
+        if (overlayType)  overlayType.textContent  = typeText === '—' ? '—' : typeText;
+        if (rightLabel)   rightLabel.textContent   = `Ritning / ${ratioText}`;
+
+        // Colour the overlay to reflect enlargement vs. reduction
+        const overlay = document.getElementById('scale-info-overlay');
+        if (overlay) {
+            overlay.style.background =
+                scale_numerator < scale_denominator ? '#1a4d6e' :
+                scale_numerator > scale_denominator ? '#4a1a1a' : '#1e3a5f';
+        }
+    }
+
+    /**
+     * Draw one workspace canvas: grid lines + labelled rectangle.
+     * @param {HTMLCanvasElement} canvas  - Target canvas element.
+     * @param {number} cellPx            - Grid cell size in pixels.
+     * @param {number} wCm               - Object width in cm.
+     * @param {number} hCm               - Object height in cm.
+     * @param {boolean} highlighted      - Whether to draw the highlight ring.
+     * @param {string} fillColor         - Fill colour of the rectangle.
+     */
+    function scale_drawSide(canvas, cellPx, wCm, hCm, highlighted, fillColor) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        // Clear
+        ctx.clearRect(0, 0, W, H);
+
+        // ── Draw 1 cm grid ──
+        ctx.strokeStyle = '#b8d4f0';
+        ctx.lineWidth   = 0.8;
+        for (let x = 0; x <= W; x += cellPx) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+        }
+        for (let y = 0; y <= H; y += cellPx) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+        }
+
+        // ── Draw the object rectangle ──
+        const objW = wCm * cellPx;
+        const objH = hCm * cellPx;
+
+        // Position: snapped to grid, centred vertically (top = 80px to leave room for label)
+        const marginTop = 80;
+        const objX = Math.round((W / 2 - objW / 2) / cellPx) * cellPx;
+        const objY = Math.round(marginTop / cellPx) * cellPx;
+
+        // Shadow
+        ctx.shadowColor   = 'rgba(0,0,0,0.12)';
+        ctx.shadowBlur    = 12;
+        ctx.shadowOffsetY = 4;
+
+        // Fill
+        ctx.fillStyle = fillColor + '55'; // semi-transparent
+        ctx.fillRect(objX, objY, objW, objH);
+
+        // Stroke
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = fillColor;
+        ctx.lineWidth   = highlighted ? 3.5 : 2;
+        if (highlighted) {
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#f5a623';
+        } else {
+            ctx.setLineDash([]);
+        }
+        ctx.strokeRect(objX, objY, objW, objH);
+        ctx.setLineDash([]);
+
+        // ── Dimension labels ──
+        ctx.fillStyle  = highlighted ? '#c87800' : fillColor;
+        ctx.font       = 'bold 13px system-ui, sans-serif';
+        ctx.textAlign  = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Width label (below object)
+        if (objW >= 20) {
+            const wLabel = scale_fmtCm(wCm);
+            ctx.fillText(wLabel, objX + objW / 2, objY + objH + 18);
+        }
+
+        // Height label (left of object, rotated)
+        if (objH >= 20) {
+            const hLabel = scale_fmtCm(hCm);
+            ctx.save();
+            ctx.translate(Math.max(objX - 18, 14), objY + objH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(hLabel, 0, 0);
+            ctx.restore();
+        }
+
+        // Update the DOM highlight ring on the left side
+        if (!highlighted) scale_updateHighlightRing(null);
+    }
+
+    /**
+     * Format a centimetre value cleanly.
+     * @param {number} cm
+     * @returns {string}
+     */
+    function scale_fmtCm(cm) {
+        const rounded = Math.round(cm * 1000) / 1000;
+        return rounded % 1 === 0 ? `${rounded} cm` : `${parseFloat(rounded.toFixed(3))} cm`;
+    }
+
+    /**
+     * Show/hide highlight ring overlay on the left workspace and re-draw both sides.
+     * @param {boolean} on
+     */
+    function scale_onHoverRight(on) {
+        scale_hovering = on;
+        scale_draw();
+        if (on) {
+            // Position the highlight ring over the left-side object
+            const cL     = document.getElementById('scale-canvas-left');
+            const leftEl = document.getElementById('scale-workspace-left');
+            if (!cL || !leftEl) return;
+            const cellPx = SCALE_CELL_PX;
+            const objW   = SCALE_OBJ_W_CM * cellPx;
+            const objH   = SCALE_OBJ_H_CM * cellPx;
+            const marginTop = 80;
+            const objX   = Math.round((cL.width  / 2 - objW / 2) / cellPx) * cellPx;
+            const objY   = Math.round(marginTop / cellPx) * cellPx;
+            scale_updateHighlightRing({ x: objX, y: objY, w: objW, h: objH });
+        } else {
+            scale_updateHighlightRing(null);
+        }
+    }
+
+    /**
+     * Show or hide the DOM highlight ring on the left workspace.
+     * @param {{x:number,y:number,w:number,h:number}|null} rect
+     */
+    function scale_updateHighlightRing(rect) {
+        const ring = document.getElementById('scale-highlight-ring');
+        if (!ring) return;
+        if (!rect) {
+            ring.style.display = 'none';
+            return;
+        }
+        ring.style.display = 'block';
+        ring.style.left   = rect.x + 'px';
+        ring.style.top    = rect.y + 'px';
+        ring.style.width  = rect.w + 'px';
+        ring.style.height = rect.h + 'px';
+    }
     window.addEventListener('resize', () => {
         if (currentView !== 'home') VIEW_REGISTRY[currentView]?.onResize?.();
     });
