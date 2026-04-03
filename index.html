@@ -124,39 +124,72 @@
         /* Scale sidebar button style */
         .scale-btn {
             display: flex; align-items: center; justify-content: center;
-            gap: 6px; padding: 8px 10px; border-radius: 10px;
-            border: 2px solid transparent; font-weight: 700; font-size: 14px;
+            gap: 4px; padding: 7px 6px; border-radius: 10px;
+            border: 2px solid transparent; font-weight: 700; font-size: 13px;
             cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
             width: 100%;
         }
         .scale-btn:hover { transform: translateY(-1px); }
         .scale-btn.active {
-            border-color: #5b80a5;
-            box-shadow: 0 0 0 3px rgba(91,128,165,0.25);
+            border-color: #b8a36e;
+            box-shadow: 0 0 0 3px rgba(184,163,110,0.30);
+        }
+
+        /* Object selection buttons */
+        .scale-obj-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 4px; padding: 6px 4px; border-radius: 9px;
+            border: 2px solid #e8e5e0; background: #f4f3ef;
+            font-weight: 700; font-size: 11px; color: #4a4b50;
+            cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .scale-obj-btn:hover { background: white; border-color: #b8d4f0; color: #3a5f80; }
+        .scale-obj-btn.active {
+            background: #eaf2fb; border-color: #5b80a5;
+            color: #3a5f80; box-shadow: 0 0 0 2px rgba(91,128,165,0.20);
         }
 
         /* Section labels inside each workspace half */
         .scale-side-label {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(255,255,255,0.88); border: 1.5px solid #cde0f5;
+            background: rgba(255,255,255,0.92); border: 1.5px solid #cde0f5;
             border-radius: 8px; padding: 3px 14px;
             font-size: 13px; font-weight: 800; color: #3a5f80;
             pointer-events: none; z-index: 10; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
         }
 
-        /* Top-right scale info overlay (presentation mode) */
+        /* Vertical dashed divider between halves */
+        #scale-divider {
+            width: 1px; background: transparent;
+            border-left: 1.5px dashed #b8d4f0;
+            flex-shrink: 0;
+        }
+
+        /* Top-right scale info overlay (beige card style) */
         #scale-info-overlay {
             position: absolute; top: 14px; right: 14px;
-            background: #1e3a5f; color: #fff;
-            border-radius: 14px; padding: 14px 22px;
-            font-size: 22px; font-weight: 900; line-height: 1.3;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+            background: #faf8f2; color: #4a4b50;
+            border: 1.5px solid #d6d4d0;
+            border-radius: 16px; padding: 14px 20px 12px;
+            box-shadow: 0 4px 20px rgba(74,75,80,0.13);
             z-index: 50; pointer-events: none;
-            text-align: center; min-width: 190px;
+            text-align: center; min-width: 240px;
             transition: opacity 0.2s;
         }
-        #scale-info-overlay .scale-overlay-sub {
-            font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 3px;
+        #scale-overlay-label {
+            font-size: 10px; font-weight: 800; color: #8c8d92;
+            text-transform: uppercase; letter-spacing: .1em; margin-bottom: 2px;
+        }
+        #scale-overlay-ratio {
+            font-size: 26px; font-weight: 900; color: #4a4b50; line-height: 1.2;
+        }
+        #scale-overlay-type {
+            font-size: 13px; font-weight: 700; color: #b8a36e; margin-top: 2px;
+        }
+        #scale-overlay-detail {
+            font-size: 11px; font-weight: 600; color: #8c8d92;
+            margin-top: 6px; border-top: 1px solid #e8e5e0; padding-top: 6px;
         }
 
         /* Highlight ring on original when hovering scaled */
@@ -166,6 +199,20 @@
             box-shadow: 0 0 0 5px rgba(245,166,35,0.25);
             pointer-events: none; z-index: 20;
             transition: opacity 0.15s;
+        }
+
+        /* Mått input section */
+        #scale-matt-section { border-top: 1px solid #e8e5e0; padding-top: 10px; }
+        .scale-matt-input {
+            width: 60px; border: 1.5px solid #d6d4d0; border-radius: 6px;
+            padding: 3px 6px; font-family: 'Nunito', sans-serif;
+            font-size: 13px; font-weight: 700; color: #4a4b50;
+            background: white; outline: none; text-align: right;
+        }
+        .scale-matt-input:focus { border-color: #5b80a5; }
+        .scale-tips-box {
+            background: #fdf8ee; border: 1px solid #e8d9b0; border-radius: 10px;
+            padding: 8px 10px; font-size: 11px; color: #7a6830; line-height: 1.4;
         }
 
         /* ── Positionssystem – column headers & dividers ── */
@@ -1335,25 +1382,74 @@
 
             <!-- Sidebar with scale controls -->
             <div id="scale-sidebar" data-view-panel="side"
-                class="w-56 bg-soft-surface shadow-md z-10 p-4 flex flex-col gap-3 overflow-y-auto border-r border-soft-border shrink-0">
+                class="w-56 bg-soft-surface shadow-md z-10 p-3 flex flex-col gap-2 overflow-y-auto border-r border-soft-border shrink-0">
 
-                <p class="text-xs font-800 text-soft-muted uppercase tracking-widest mt-1">Förminskning</p>
-                <button onclick="scale_setScale(1,2)"  id="scale-btn-1-2"   class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:2</button>
-                <button onclick="scale_setScale(1,5)"  id="scale-btn-1-5"   class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:5</button>
-                <button onclick="scale_setScale(1,10)" id="scale-btn-1-10"  class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:10</button>
-                <button onclick="scale_setScale(1,100)"id="scale-btn-1-100" class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:100</button>
+                <!-- VÄLJ OBJEKT -->
+                <p class="text-xs font-800 text-soft-muted uppercase tracking-widest mt-1">Välj objekt</p>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="scale_setObject('skruv')"       id="scale-obj-skruv"       class="scale-obj-btn">🔩 Skruv</button>
+                    <button onclick="scale_setObject('insekt')"      id="scale-obj-insekt"      class="scale-obj-btn">🐛 Insekt</button>
+                    <button onclick="scale_setObject('gem')"         id="scale-obj-gem"         class="scale-obj-btn active">📎 Gem</button>
+                    <button onclick="scale_setObject('blyertspenna')"id="scale-obj-blyertspenna"class="scale-obj-btn">✏️ Blyertspenna</button>
+                    <button onclick="scale_setObject('rektangel')"   id="scale-obj-rektangel"   class="scale-obj-btn">▬ Rektangel</button>
+                    <button onclick="scale_setObject('kvadrat')"     id="scale-obj-kvadrat"     class="scale-obj-btn">□ Kvadrat</button>
+                </div>
 
-                <hr class="border-soft-border my-1">
+                <hr class="border-soft-border my-0.5">
+
+                <!-- FÖRMINSKNING -->
+                <p class="text-xs font-800 text-soft-muted uppercase tracking-widest">Förminskning</p>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="scale_setScale(1,100)" id="scale-btn-1-100" class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:100</button>
+                    <button onclick="scale_setScale(1,10)"  id="scale-btn-1-10"  class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:10</button>
+                    <button onclick="scale_setScale(1,5)"   id="scale-btn-1-5"   class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:5</button>
+                    <button onclick="scale_setScale(1,2)"   id="scale-btn-1-2"   class="scale-btn bg-soft-blueLight/20 text-soft-blue">1:2</button>
+                </div>
+
+                <!-- ORIGINAL -->
+                <p class="text-xs font-800 text-soft-muted uppercase tracking-widest">Original</p>
+                <button onclick="scale_setScale(1,1)" id="scale-btn-1-1"
+                    class="scale-btn bg-soft-yellow/30 text-soft-yellowDark border border-soft-yellow active">1:1 (Original)</button>
+
+                <!-- FÖRSTORING -->
                 <p class="text-xs font-800 text-soft-muted uppercase tracking-widest">Förstoring</p>
-                <button onclick="scale_setScale(2,1)"  id="scale-btn-2-1"   class="scale-btn bg-soft-greenLight/20 text-soft-green">2:1</button>
-                <button onclick="scale_setScale(5,1)"  id="scale-btn-5-1"   class="scale-btn bg-soft-greenLight/20 text-soft-green">5:1</button>
-                <button onclick="scale_setScale(10,1)" id="scale-btn-10-1"  class="scale-btn bg-soft-greenLight/20 text-soft-green">10:1</button>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="scale_setScale(2,1)"  id="scale-btn-2-1"  class="scale-btn bg-soft-greenLight/20 text-soft-green">2:1</button>
+                    <button onclick="scale_setScale(5,1)"  id="scale-btn-5-1"  class="scale-btn bg-soft-greenLight/20 text-soft-green">5:1</button>
+                    <button onclick="scale_setScale(10,1)" id="scale-btn-10-1" class="scale-btn bg-soft-greenLight/20 text-soft-green col-span-2">10:1</button>
+                </div>
 
-                <hr class="border-soft-border my-1">
-                <button onclick="scale_setScale(1,1)"  id="scale-btn-1-1"   class="scale-btn bg-soft-surface border border-soft-border text-soft-text">1:1 (Återställ)</button>
+                <!-- Tips box -->
+                <div class="scale-tips-box mt-1">
+                    <i class="fas fa-info-circle"></i> <strong>Tips:</strong> Håll muspekaren över ritningen till höger för att se sambandet med originalet.
+                </div>
 
-                <div class="mt-auto pt-3 border-t border-soft-border text-xs text-soft-muted text-center">
-                    Mått: <span id="scale-unit-label" class="font-bold text-soft-text">cm</span>
+                <!-- MÅTT section -->
+                <div id="scale-matt-section" class="mt-auto flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-800 text-soft-muted uppercase tracking-widest">Mått</span>
+                        <label class="flex items-center gap-1 text-xs font-700 text-soft-muted cursor-pointer">
+                            <input type="checkbox" id="scale-lock-prop" onchange="scale_onLockPropChange()"> Lås prop.
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-700 text-soft-text w-10">Bredd:</span>
+                        <input type="number" id="scale-input-w" class="scale-matt-input" min="0.1" max="50" step="0.1"
+                            oninput="scale_onDimInput('w')">
+                        <span class="text-xs text-soft-muted">cm</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-700 text-soft-text w-10">Höjd:</span>
+                        <input type="number" id="scale-input-h" class="scale-matt-input" min="0.1" max="50" step="0.1"
+                            oninput="scale_onDimInput('h')">
+                        <span class="text-xs text-soft-muted">cm</span>
+                    </div>
+                    <div class="text-xs text-soft-muted">
+                        Ritning bredd: <span id="scale-label-rw" class="font-bold" style="color:#b8a36e;">0,800 cm</span>
+                    </div>
+                    <div class="text-xs text-soft-muted">
+                        Ritning höjd: <span id="scale-label-rh" class="font-bold text-soft-green">3 cm</span>
+                    </div>
                 </div>
             </div>
 
@@ -1362,26 +1458,28 @@
 
                 <!-- Left half – Verklighet (original) -->
                 <div class="flex-1 relative" id="scale-workspace-left">
-                    <div class="scale-side-label">Verklighet</div>
+                    <div class="scale-side-label"><i class="fas fa-home" style="font-size:11px;"></i> Verklighet</div>
                     <div id="scale-highlight-ring" class="scale-highlight-ring" style="display:none;"></div>
                     <canvas id="scale-canvas-left" style="position:absolute;top:0;left:0;display:block;"></canvas>
                 </div>
 
-                <!-- Vertical divider -->
-                <div class="w-px bg-soft-border shrink-0"></div>
+                <!-- Vertical dashed divider -->
+                <div id="scale-divider"></div>
 
                 <!-- Right half – Ritning / Skala (scaled copy) -->
                 <div class="flex-1 relative" id="scale-workspace-right">
-                    <div class="scale-side-label" id="scale-right-label">Ritning / Skala</div>
+                    <div class="scale-side-label" id="scale-right-label"><i class="fas fa-ruler" style="font-size:11px;"></i> Ritning / Skala</div>
                     <canvas id="scale-canvas-right" style="position:absolute;top:0;left:0;display:block;"
                         onmouseenter="scale_onHoverRight(true)"
                         onmouseleave="scale_onHoverRight(false)"></canvas>
                 </div>
 
-                <!-- Presentation info overlay (top-right of main area) -->
+                <!-- Info overlay (top-right of main area) -->
                 <div id="scale-info-overlay">
+                    <div id="scale-overlay-label">AKTIV SKALA</div>
                     <div id="scale-overlay-ratio">Skala 1:1</div>
-                    <div class="scale-overlay-sub" id="scale-overlay-type">—</div>
+                    <div id="scale-overlay-type">(Original)</div>
+                    <div id="scale-overlay-detail">Gem | Original: 0,800×3 cm | Ritning: 0,800×3 cm</div>
                 </div>
 
             </div>
@@ -5358,26 +5456,38 @@
     /** Grid cell size in pixels (1 cm at standard screen DPI). */
     const SCALE_CELL_PX = 40;
 
-    /**
-     * Original object dimensions in centimetres.
-     * A 5×4 cm rectangle gives enough resolution for the reduction scales.
-     */
-    const SCALE_OBJ_W_CM = 5;
-    const SCALE_OBJ_H_CM = 4;
+    /** Rounding precision (3 decimal places). */
+    const SCALE_ROUND = 1000;
 
-    /** Scale state – numerator:denominator (e.g. 1:2 means numerator=1, denominator=2). */
+    /** Object library – default dimensions in cm and drawing type. */
+    const SCALE_OBJECTS = {
+        skruv:        { label: 'Skruv',       w: 0.5,  h: 4.0,  type: 'skruv' },
+        insekt:       { label: 'Insekt',       w: 1.4,  h: 2.0,  type: 'insekt' },
+        gem:          { label: 'Gem',          w: 0.8,  h: 3.0,  type: 'gem' },
+        blyertspenna: { label: 'Blyertspenna', w: 0.6,  h: 7.0,  type: 'blyertspenna' },
+        rektangel:    { label: 'Rektangel',    w: 4.0,  h: 2.5,  type: 'rektangel' },
+        kvadrat:      { label: 'Kvadrat',      w: 3.0,  h: 3.0,  type: 'kvadrat' },
+    };
+
+    /** Currently selected object key. */
+    let scale_activeObject = 'gem';
+
+    /** Base dimensions in cm (editable via Mått inputs). */
+    let scale_objWCm = 0.8;
+    let scale_objHCm = 3.0;
+
+    /** Whether proportions are locked. */
+    let scale_lockProp = false;
+
+    /** Scale state – numerator:denominator (e.g. 1:2 means num=1, den=2). */
     let scale_numerator   = 1;
     let scale_denominator = 1;
-
-    /** Future-proofing: active measurement unit (not yet interactive in Step 1). */
-    let scale_currentUnit = 'cm';
 
     /** True while the pointer is hovering over the right (scaled) canvas. */
     let scale_hovering = false;
 
     /**
      * Called when the Scale view becomes active (VIEW_REGISTRY onEnter / onResize).
-     * Sizes both canvases to fill their parent containers, then draws.
      */
     function scale_onEnter() {
         const leftEl  = document.getElementById('scale-workspace-left');
@@ -5389,6 +5499,8 @@
         cL.height = leftEl.clientHeight;
         cR.width  = rightEl.clientWidth;
         cR.height = rightEl.clientHeight;
+        // Initialise button state and inputs on first enter
+        scale_updateMattInputs();
         scale_draw();
     }
 
@@ -5400,7 +5512,6 @@
     function scale_setScale(num, den) {
         scale_numerator   = num;
         scale_denominator = den;
-        // Update active button styling
         document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
         const id = `scale-btn-${num}-${den}`;
         const btn = document.getElementById(id);
@@ -5409,79 +5520,139 @@
     }
 
     /**
-     * Draw both canvases: the original on the left and the scaled version on the right.
-     * Also updates the presentation overlay.
+     * Select an object type, reset its base dimensions, and redraw.
+     * @param {string} key
+     */
+    function scale_setObject(key) {
+        if (!SCALE_OBJECTS[key]) return;
+        scale_activeObject = key;
+        const obj = SCALE_OBJECTS[key];
+        scale_objWCm = obj.w;
+        scale_objHCm = obj.h;
+        document.querySelectorAll('.scale-obj-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById('scale-obj-' + key);
+        if (btn) btn.classList.add('active');
+        scale_updateMattInputs();
+        scale_draw();
+    }
+
+    /**
+     * Handle Lås prop. checkbox change.
+     */
+    function scale_onLockPropChange() {
+        const cb = document.getElementById('scale-lock-prop');
+        scale_lockProp = cb ? cb.checked : false;
+    }
+
+    /**
+     * Handle changes to Bredd or Höjd inputs.
+     * @param {'w'|'h'} dim
+     */
+    function scale_onDimInput(dim) {
+        const wEl = document.getElementById('scale-input-w');
+        const hEl = document.getElementById('scale-input-h');
+        if (!wEl || !hEl) return;
+        const newW = parseFloat(wEl.value);
+        const newH = parseFloat(hEl.value);
+        if (dim === 'w' && !isNaN(newW) && newW > 0) {
+            if (scale_lockProp && scale_objWCm > 0) {
+                const ratio = newW / scale_objWCm;
+                scale_objHCm = Math.round(scale_objHCm * ratio * SCALE_ROUND) / SCALE_ROUND;
+                hEl.value = scale_objHCm;
+            }
+            scale_objWCm = newW;
+        } else if (dim === 'h' && !isNaN(newH) && newH > 0) {
+            if (scale_lockProp && scale_objHCm > 0) {
+                const ratio = newH / scale_objHCm;
+                scale_objWCm = Math.round(scale_objWCm * ratio * SCALE_ROUND) / SCALE_ROUND;
+                wEl.value = scale_objWCm;
+            }
+            scale_objHCm = newH;
+        }
+        scale_updateMattInputs(false);
+        scale_draw();
+    }
+
+    /**
+     * Sync the Mått input fields and Ritning labels.
+     * @param {boolean} [updateInputValues=true] Whether to also reset the dimension input values.
+     */
+    function scale_updateMattInputs(updateInputValues = true) {
+        const wEl = document.getElementById('scale-input-w');
+        const hEl = document.getElementById('scale-input-h');
+        const rwEl = document.getElementById('scale-label-rw');
+        const rhEl = document.getElementById('scale-label-rh');
+        if (updateInputValues) {
+            if (wEl) wEl.value = scale_objWCm;
+            if (hEl) hEl.value = scale_objHCm;
+        }
+        const factor = scale_numerator / scale_denominator;
+        if (rwEl) rwEl.textContent = scale_fmtCm(scale_objWCm * factor);
+        if (rhEl) rhEl.textContent = scale_fmtCm(scale_objHCm * factor);
+    }
+
+    /**
+     * Draw both canvases and update all UI labels.
      */
     function scale_draw() {
         const factor = scale_numerator / scale_denominator;
 
-        // ── Left canvas (Verklighet – always 1:1) ──
+        // ── Left canvas (Verklighet – always 1:1, blue) ──
         scale_drawSide(
             document.getElementById('scale-canvas-left'),
             SCALE_CELL_PX,
-            SCALE_OBJ_W_CM,
-            SCALE_OBJ_H_CM,
-            scale_hovering,   // highlight when mouse is over the right side
-            '#5b80a5'         // fill colour – soft blue
+            scale_objWCm,
+            scale_objHCm,
+            scale_hovering,
+            '#5b80a5',   // blue for reality
+            false
         );
 
-        // Color of the scaled object reflects whether it is reduced, enlarged, or 1:1
-        const SCALE_COLOR_REDUCTION  = '#2E7D32';
-        const SCALE_COLOR_ENLARGEMENT = '#C62828';
-        const SCALE_COLOR_NEUTRAL    = '#5b80a5';
-        const scaledColor = scale_denominator > scale_numerator ? SCALE_COLOR_REDUCTION
-                          : scale_numerator   > scale_denominator ? SCALE_COLOR_ENLARGEMENT
-                          : SCALE_COLOR_NEUTRAL;
-
-        // ── Right canvas (Ritning / Skala) ──
+        // ── Right canvas (Ritning / Skala – scaled, warm gold) ──
         scale_drawSide(
             document.getElementById('scale-canvas-right'),
             SCALE_CELL_PX,
-            SCALE_OBJ_W_CM * factor,
-            SCALE_OBJ_H_CM * factor,
+            scale_objWCm * factor,
+            scale_objHCm * factor,
             false,
-            scaledColor
+            '#b8a36e',   // warm gold for drawing/scale
+            false
         );
 
-        // ── Update presentation overlay ──
+        // ── Update info overlay ──
         const ratioText = `Skala ${scale_numerator}:${scale_denominator}`;
         let typeText;
-        if (scale_numerator < scale_denominator)       typeText = 'Förminskning';
-        else if (scale_numerator > scale_denominator)  typeText = 'Förstoring';
-        else                                           typeText = '—';
+        if (scale_numerator < scale_denominator)       typeText = '(Förminskning)';
+        else if (scale_numerator > scale_denominator)  typeText = '(Förstoring)';
+        else                                           typeText = '(Original)';
 
-        const overlayRatio = document.getElementById('scale-overlay-ratio');
-        const overlayType  = document.getElementById('scale-overlay-type');
-        const rightLabel   = document.getElementById('scale-right-label');
-        if (overlayRatio) overlayRatio.textContent = ratioText;
-        if (overlayType)  overlayType.textContent  = typeText === '—' ? '—' : typeText;
-        if (rightLabel)   rightLabel.textContent   = `Ritning / ${ratioText}`;
+        const objDef = SCALE_OBJECTS[scale_activeObject] || SCALE_OBJECTS.gem;
+        const rW = scale_objWCm * factor;
+        const rH = scale_objHCm * factor;
+        const detailText = `${objDef.label} | Original: ${scale_fmtCmVal(scale_objWCm)}×${scale_fmtCm(scale_objHCm)} | Ritning: ${scale_fmtCmVal(rW)}×${scale_fmtCm(rH)}`;
 
-        // Colour the overlay to reflect enlargement vs. reduction
-        const overlay = document.getElementById('scale-info-overlay');
-        if (overlay) {
-            overlay.style.background =
-                scale_numerator < scale_denominator ? '#1a4d6e' :
-                scale_numerator > scale_denominator ? '#4a1a1a' : '#1e3a5f';
-        }
+        const overlayRatio  = document.getElementById('scale-overlay-ratio');
+        const overlayType   = document.getElementById('scale-overlay-type');
+        const overlayDetail = document.getElementById('scale-overlay-detail');
+        const rightLabel    = document.getElementById('scale-right-label');
+        if (overlayRatio)  overlayRatio.textContent  = ratioText;
+        if (overlayType)   overlayType.textContent   = typeText;
+        if (overlayDetail) overlayDetail.textContent = detailText;
+        if (rightLabel)    rightLabel.innerHTML      = `<i class="fas fa-ruler" style="font-size:11px;"></i> Ritning / ${ratioText}`;
+
+        // Update Ritning labels in sidebar (don't overwrite user's active input)
+        scale_updateMattInputs(false);
     }
 
     /**
-     * Draw one workspace canvas: grid lines + labelled rectangle.
-     * @param {HTMLCanvasElement} canvas  - Target canvas element.
-     * @param {number} cellPx            - Grid cell size in pixels.
-     * @param {number} wCm               - Object width in cm.
-     * @param {number} hCm               - Object height in cm.
-     * @param {boolean} highlighted      - Whether to draw the highlight ring.
-     * @param {string} fillColor         - Fill colour of the rectangle.
+     * Draw one workspace canvas: grid + object shape + dimension lines.
      */
-    function scale_drawSide(canvas, cellPx, wCm, hCm, highlighted, fillColor) {
+    function scale_drawSide(canvas, cellPx, wCm, hCm, highlighted, strokeColor) {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         const W = canvas.width;
         const H = canvas.height;
 
-        // Clear
         ctx.clearRect(0, 0, W, H);
 
         // ── Draw 1 cm grid ──
@@ -5494,65 +5665,295 @@
             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
         }
 
-        // ── Draw the object rectangle ──
+        // Pixel dimensions of the object
         const objW = wCm * cellPx;
         const objH = hCm * cellPx;
 
-        // Position: snapped to grid, centred vertically (top = 80px to leave room for label)
-        const marginTop = 80;
-        const objX = Math.round((W / 2 - objW / 2) / cellPx) * cellPx;
-        const objY = Math.round(marginTop / cellPx) * cellPx;
+        // Centre horizontally; leave 70px at top for label + dim line
+        const marginTop = 70;
+        const objX = Math.max(40, (W - objW) / 2);
+        const objY = marginTop;
 
-        // Shadow
-        ctx.shadowColor   = 'rgba(0,0,0,0.12)';
-        ctx.shadowBlur    = 12;
-        ctx.shadowOffsetY = 4;
+        // Choose drawing function based on selected object
+        const type = SCALE_OBJECTS[scale_activeObject]?.type || 'rektangel';
+        ctx.save();
+        switch (type) {
+            case 'gem':         scale_drawGem(ctx, objX, objY, objW, objH, strokeColor, highlighted); break;
+            case 'skruv':       scale_drawSkruv(ctx, objX, objY, objW, objH, strokeColor, highlighted); break;
+            case 'insekt':      scale_drawInsekt(ctx, objX, objY, objW, objH, strokeColor, highlighted); break;
+            case 'blyertspenna':scale_drawBlyertspenna(ctx, objX, objY, objW, objH, strokeColor, highlighted); break;
+            default:            scale_drawRect(ctx, objX, objY, objW, objH, strokeColor, highlighted); break;
+        }
+        ctx.restore();
 
-        // Fill
-        ctx.fillStyle = fillColor + '55'; // semi-transparent
-        ctx.fillRect(objX, objY, objW, objH);
+        // ── Dimension lines ──
+        scale_drawDimLines(ctx, objX, objY, objW, objH, wCm, hCm, strokeColor, highlighted);
 
-        // Stroke
+        // Update DOM highlight ring on left side
+        if (highlighted) {
+            scale_updateHighlightRing({ x: objX, y: objY, w: objW, h: objH });
+        } else {
+            scale_updateHighlightRing(null);
+        }
+    }
+
+    // ── Object drawing functions ──────────────────────────────────────────────
+
+    /** Draw paperclip (Gem) shape. */
+    function scale_drawGem(ctx, x, y, w, h, color, highlighted) {
+        const lw = Math.max(1.5, Math.min(3.5, w * 0.10));
+        ctx.strokeStyle = highlighted ? '#f5a623' : color;
+        ctx.lineWidth = highlighted ? lw + 1 : lw;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.fillStyle = color + '22';
+
+        const cx = x + w / 2;
+        const outerR = w / 2;
+
+        // Outer rounded-rect (full oval)
+        ctx.beginPath();
+        ctx.moveTo(cx - outerR, y + outerR);
+        ctx.arc(cx, y + outerR, outerR, Math.PI, 0);
+        ctx.lineTo(cx + outerR, y + h - outerR);
+        ctx.arc(cx, y + h - outerR, outerR, 0, Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Inner loop (starts near top, ends ~62% down, creating the clasp)
+        const inset = lw * 2 + 1;
+        const innerR = Math.max(2, (w - inset * 2) / 2);
+        const innerX = cx - innerR;
+        const innerTop = y + outerR * 0.35;
+        const innerBot = y + h * 0.62;
+
+        ctx.beginPath();
+        ctx.moveTo(innerX, innerTop + innerR);
+        ctx.arc(cx, innerTop + innerR, innerR, Math.PI, 0);
+        ctx.lineTo(cx + innerR, innerBot);
+        ctx.arc(cx, innerBot, innerR, 0, Math.PI);
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    /** Draw a simple screw shape. */
+    function scale_drawSkruv(ctx, x, y, w, h, color, highlighted) {
+        const lw = Math.max(1.5, Math.min(3, w * 0.08));
+        ctx.strokeStyle = highlighted ? '#f5a623' : color;
+        ctx.fillStyle = color + '33';
+        ctx.lineWidth = highlighted ? lw + 1 : lw;
+        ctx.lineCap = 'round';
+
+        const headH = Math.min(h * 0.18, w * 0.8);
+        const headW = w * 1.6;
+        const headX = x + w / 2 - headW / 2;
+
+        // Hex head
+        ctx.beginPath();
+        ctx.rect(headX, y, headW, headH);
+        ctx.fill(); ctx.stroke();
+
+        // Shaft
+        ctx.beginPath();
+        ctx.rect(x, y + headH, w, h - headH);
+        ctx.fill(); ctx.stroke();
+
+        // Thread lines
+        const threadStep = Math.max(3, h * 0.06);
+        ctx.lineWidth = Math.max(0.8, lw * 0.5);
+        for (let ty = y + headH + threadStep; ty < y + h - 2; ty += threadStep) {
+            ctx.beginPath(); ctx.moveTo(x, ty); ctx.lineTo(x + w, ty); ctx.stroke();
+        }
+    }
+
+    /** Draw a simple insect/bug shape. */
+    function scale_drawInsekt(ctx, x, y, w, h, color, highlighted) {
+        const lw = Math.max(1.5, Math.min(3, w * 0.06));
+        ctx.strokeStyle = highlighted ? '#f5a623' : color;
+        ctx.fillStyle = color + '33';
+        ctx.lineWidth = highlighted ? lw + 1 : lw;
+        ctx.lineCap = 'round';
+
+        const cx = x + w / 2;
+        const bodyW = w * 0.5;
+        const bodyH = h * 0.55;
+        const headR = w * 0.22;
+        const bodyX = cx - bodyW / 2;
+        const bodyY = y + headR * 2.2;
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(cx, y + headR, headR, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        // Body (oval)
+        ctx.beginPath();
+        ctx.ellipse(cx, bodyY + bodyH / 2, bodyW / 2, bodyH / 2, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        // Wings
+        ctx.fillStyle = color + '22';
+        const wingW = w * 0.55;
+        const wingH = h * 0.35;
+        ctx.beginPath();
+        ctx.ellipse(cx - bodyW * 0.6, bodyY + wingH * 0.4, wingW * 0.5, wingH * 0.5, -0.3, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(cx + bodyW * 0.6, bodyY + wingH * 0.4, wingW * 0.5, wingH * 0.5, 0.3, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        // Antennae
+        ctx.lineWidth = Math.max(1, lw * 0.7);
+        ctx.beginPath();
+        ctx.moveTo(cx - headR * 0.5, y + headR * 0.3);
+        ctx.lineTo(cx - headR * 1.6, y - headR * 0.6);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + headR * 0.5, y + headR * 0.3);
+        ctx.lineTo(cx + headR * 1.6, y - headR * 0.6);
+        ctx.stroke();
+    }
+
+    /** Draw a pencil shape (blyertspenna). */
+    function scale_drawBlyertspenna(ctx, x, y, w, h, color, highlighted) {
+        const lw = Math.max(1.5, Math.min(3, w * 0.08));
+        ctx.strokeStyle = highlighted ? '#f5a623' : color;
+        ctx.fillStyle = color + '33';
+        ctx.lineWidth = highlighted ? lw + 1 : lw;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        const tipH = Math.min(h * 0.15, w * 1.5);
+        const eraserH = Math.min(h * 0.08, w * 0.8);
+
+        // Eraser (top)
+        ctx.fillStyle = '#d58b99' + '66';
+        ctx.strokeStyle = highlighted ? '#f5a623' : '#d58b99';
+        ctx.beginPath();
+        ctx.rect(x, y, w, eraserH);
+        ctx.fill(); ctx.stroke();
+
+        // Body
+        ctx.fillStyle = color + '33';
+        ctx.strokeStyle = highlighted ? '#f5a623' : color;
+        ctx.beginPath();
+        ctx.rect(x, y + eraserH, w, h - eraserH - tipH);
+        ctx.fill(); ctx.stroke();
+
+        // Tip (triangle pointing down)
+        ctx.fillStyle = color + '55';
+        ctx.beginPath();
+        ctx.moveTo(x, y + h - tipH);
+        ctx.lineTo(x + w, y + h - tipH);
+        ctx.lineTo(x + w / 2, y + h);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+    }
+
+    /** Draw a generic rectangle (rektangel / kvadrat). */
+    function scale_drawRect(ctx, x, y, w, h, color, highlighted) {
+        const lw = Math.max(1.5, Math.min(3.5, Math.min(w, h) * 0.04));
+        ctx.strokeStyle = highlighted ? '#f5a623' : color;
+        ctx.fillStyle = color + '33';
+        ctx.lineWidth = highlighted ? lw + 1 : lw;
+        ctx.lineCap = 'round';
+
+        ctx.shadowColor   = 'rgba(0,0,0,0.10)';
+        ctx.shadowBlur    = 10;
+        ctx.shadowOffsetY = 3;
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.fill();
         ctx.shadowColor = 'transparent';
+        ctx.stroke();
+    }
+
+    // ── Dimension lines ───────────────────────────────────────────────────────
+
+    /**
+     * Draw dimension lines with arrow ticks and cm labels around the object.
+     */
+    function scale_drawDimLines(ctx, objX, objY, objW, objH, wCm, hCm, color, highlighted) {
+        const dimColor = highlighted ? '#c87800' : color;
+        ctx.save();
+        ctx.strokeStyle = dimColor;
+        ctx.fillStyle   = dimColor;
+        ctx.lineWidth   = 1;
         ctx.setLineDash([]);
-        ctx.lineWidth   = highlighted ? 3.5 : 2;
-        ctx.strokeStyle = highlighted ? '#f5a623' : fillColor;
-        ctx.strokeRect(objX, objY, objW, objH);
+        ctx.lineCap = 'square';
 
-        // ── Dimension labels ──
-        ctx.fillStyle  = highlighted ? '#c87800' : fillColor;
-        ctx.font       = 'bold 13px system-ui, sans-serif';
-        ctx.textAlign  = 'center';
-        ctx.textBaseline = 'middle';
+        const tick   = 5;
+        const gap    = 8;
+        const fSize  = Math.max(10, Math.min(13, Math.min(objW, 80) * 0.18 + 9));
+        ctx.font = `bold ${fSize}px system-ui, sans-serif`;
 
-        // Width label (below object)
-        if (objW >= 20) {
+        // ── Width dimension line (above object) ──
+        if (objW >= 16) {
+            const dimY = objY - gap - tick;
+            // Ticks
+            ctx.beginPath(); ctx.moveTo(objX, dimY - tick); ctx.lineTo(objX, dimY + tick); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(objX + objW, dimY - tick); ctx.lineTo(objX + objW, dimY + tick); ctx.stroke();
+            // Arrow line
+            ctx.beginPath(); ctx.moveTo(objX, dimY); ctx.lineTo(objX + objW, dimY); ctx.stroke();
+            // Arrow heads
+            const ah = 4;
+            ctx.beginPath();
+            ctx.moveTo(objX, dimY); ctx.lineTo(objX + ah, dimY - ah); ctx.moveTo(objX, dimY); ctx.lineTo(objX + ah, dimY + ah); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(objX + objW, dimY); ctx.lineTo(objX + objW - ah, dimY - ah); ctx.moveTo(objX + objW, dimY); ctx.lineTo(objX + objW - ah, dimY + ah); ctx.stroke();
+            // Label
             const wLabel = scale_fmtCm(wCm);
-            ctx.fillText(wLabel, objX + objW / 2, objY + objH + 18);
+            ctx.textAlign    = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(wLabel, objX + objW / 2, dimY - 3);
         }
 
-        // Height label (left of object, rotated)
-        if (objH >= 20) {
-            const hLabel = scale_fmtCm(hCm);
+        // ── Height dimension line (left of object) ──
+        if (objH >= 16) {
+            const dimX = Math.max(22, objX - gap - tick - 2);
+            // Ticks
+            ctx.beginPath(); ctx.moveTo(dimX - tick, objY); ctx.lineTo(dimX + tick, objY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(dimX - tick, objY + objH); ctx.lineTo(dimX + tick, objY + objH); ctx.stroke();
+            // Arrow line
+            ctx.beginPath(); ctx.moveTo(dimX, objY); ctx.lineTo(dimX, objY + objH); ctx.stroke();
+            // Arrow heads
+            const ah = 4;
+            ctx.beginPath();
+            ctx.moveTo(dimX, objY); ctx.lineTo(dimX - ah, objY + ah); ctx.moveTo(dimX, objY); ctx.lineTo(dimX + ah, objY + ah); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(dimX, objY + objH); ctx.lineTo(dimX - ah, objY + objH - ah); ctx.moveTo(dimX, objY + objH); ctx.lineTo(dimX + ah, objY + objH - ah); ctx.stroke();
+            // Rotated label
             ctx.save();
-            ctx.translate(Math.max(objX - 18, 14), objY + objH / 2);
+            ctx.translate(dimX - 4, objY + objH / 2);
             ctx.rotate(-Math.PI / 2);
-            ctx.fillText(hLabel, 0, 0);
+            ctx.textAlign    = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(scale_fmtCm(hCm), 0, 0);
             ctx.restore();
         }
 
-        // Update the DOM highlight ring on the left side
-        if (!highlighted) scale_updateHighlightRing(null);
+        ctx.restore();
     }
 
     /**
-     * Format a centimetre value cleanly.
+     * Format a centimetre value without the unit suffix, in Swedish notation.
+     * @param {number} cm
+     * @returns {string}
+     */
+    function scale_fmtCmVal(cm) {
+        const rounded = Math.round(cm * SCALE_ROUND) / SCALE_ROUND;
+        if (rounded % 1 === 0) return `${rounded}`;
+        return rounded.toFixed(3).replace('.', ',');
+    }
+
+    /**
+     * Format a centimetre value in Swedish notation (comma decimal, 3 dp for fractions).
      * @param {number} cm
      * @returns {string}
      */
     function scale_fmtCm(cm) {
-        const rounded = Math.round(cm * 1000) / 1000;
-        return rounded % 1 === 0 ? `${rounded} cm` : `${rounded.toFixed(3).replace(/\.?0+$/, '')} cm`;
+        return `${scale_fmtCmVal(cm)} cm`;
     }
 
     /**
@@ -5561,22 +5962,20 @@
      */
     function scale_onHoverRight(on) {
         scale_hovering = on;
-        scale_draw();
         if (on) {
-            // Position the highlight ring over the left-side object
+            // Temporarily draw left side with highlight
             const cL     = document.getElementById('scale-canvas-left');
             const leftEl = document.getElementById('scale-workspace-left');
             if (!cL || !leftEl) return;
-            const cellPx = SCALE_CELL_PX;
-            const objW   = SCALE_OBJ_W_CM * cellPx;
-            const objH   = SCALE_OBJ_H_CM * cellPx;
-            const marginTop = 80;
-            const objX   = Math.round((cL.width  / 2 - objW / 2) / cellPx) * cellPx;
-            const objY   = Math.round(marginTop / cellPx) * cellPx;
+            const objW = scale_objWCm * SCALE_CELL_PX;
+            const objH = scale_objHCm * SCALE_CELL_PX;
+            const objX = Math.max(40, (cL.width - objW) / 2);
+            const objY = 70;
             scale_updateHighlightRing({ x: objX, y: objY, w: objW, h: objH });
         } else {
             scale_updateHighlightRing(null);
         }
+        scale_draw();
     }
 
     /**
