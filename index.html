@@ -4799,9 +4799,19 @@
     function decInsertPlaceholderZeros() {
         if (decDigits.length === 0) return;
         const maxPos = Math.max(...decDigits.map(d => d.pos));
+        const minPos = Math.min(...decDigits.map(d => d.pos));
         // If all digits are in fractional positions, add a leading zero in the Ones column
         if (maxPos < 0) {
             decDigits.push({ pos: 0, val: 0 });
+        }
+        // Fill gaps in fractional columns between pos=-1 and the smallest occupied position.
+        // Example: 1,2 ÷ 100 = 0,012 → pos=-2 has a digit, so pos=-1 (Tiondelar) needs a 0.
+        if (minPos < -1) {
+            for (let pos = -1; pos > minPos; pos--) {
+                if (!decDigits.some(d => d.pos === pos)) {
+                    decDigits.push({ pos, val: 0 });
+                }
+            }
         }
         if (maxPos <= 0) return; // all digits at/below ones, no integer gap possible
         for (let pos = 0; pos < maxPos; pos++) {
