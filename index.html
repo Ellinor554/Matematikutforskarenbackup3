@@ -5456,6 +5456,9 @@
     /** Grid cell size in pixels (1 cm at standard screen DPI). */
     const SCALE_CELL_PX = 40;
 
+    /** Rounding precision (3 decimal places). */
+    const SCALE_ROUND = 1000;
+
     /** Object library – default dimensions in cm and drawing type. */
     const SCALE_OBJECTS = {
         skruv:        { label: 'Skruv',       w: 0.5,  h: 4.0,  type: 'skruv' },
@@ -5554,32 +5557,32 @@
         if (dim === 'w' && !isNaN(newW) && newW > 0) {
             if (scale_lockProp && scale_objWCm > 0) {
                 const ratio = newW / scale_objWCm;
-                scale_objHCm = Math.round(scale_objHCm * ratio * 1000) / 1000;
+                scale_objHCm = Math.round(scale_objHCm * ratio * SCALE_ROUND) / SCALE_ROUND;
                 hEl.value = scale_objHCm;
             }
             scale_objWCm = newW;
         } else if (dim === 'h' && !isNaN(newH) && newH > 0) {
             if (scale_lockProp && scale_objHCm > 0) {
                 const ratio = newH / scale_objHCm;
-                scale_objWCm = Math.round(scale_objWCm * ratio * 1000) / 1000;
+                scale_objWCm = Math.round(scale_objWCm * ratio * SCALE_ROUND) / SCALE_ROUND;
                 wEl.value = scale_objWCm;
             }
             scale_objHCm = newH;
         }
-        scale_updateMattInputs();
+        scale_updateMattInputs(false);
         scale_draw();
     }
 
     /**
      * Sync the Mått input fields and Ritning labels.
-     * @param {boolean} [updateInputs=true] Whether to also reset the dimension input values.
+     * @param {boolean} [updateInputValues=true] Whether to also reset the dimension input values.
      */
-    function scale_updateMattInputs(updateInputs) {
+    function scale_updateMattInputs(updateInputValues = true) {
         const wEl = document.getElementById('scale-input-w');
         const hEl = document.getElementById('scale-input-h');
         const rwEl = document.getElementById('scale-label-rw');
         const rhEl = document.getElementById('scale-label-rh');
-        if (updateInputs !== false) {
+        if (updateInputValues) {
             if (wEl) wEl.value = scale_objWCm;
             if (hEl) hEl.value = scale_objHCm;
         }
@@ -5626,7 +5629,7 @@
         const objDef = SCALE_OBJECTS[scale_activeObject] || SCALE_OBJECTS.gem;
         const rW = scale_objWCm * factor;
         const rH = scale_objHCm * factor;
-        const detailText = `${objDef.label} | Original: ${scale_fmtCm(scale_objWCm).replace(' cm', '')}×${scale_fmtCm(scale_objHCm)} | Ritning: ${scale_fmtCm(rW).replace(' cm', '')}×${scale_fmtCm(rH)}`;
+        const detailText = `${objDef.label} | Original: ${scale_fmtCmVal(scale_objWCm)}×${scale_fmtCm(scale_objHCm)} | Ritning: ${scale_fmtCmVal(rW)}×${scale_fmtCm(rH)}`;
 
         const overlayRatio  = document.getElementById('scale-overlay-ratio');
         const overlayType   = document.getElementById('scale-overlay-type');
@@ -5934,14 +5937,23 @@
     }
 
     /**
+     * Format a centimetre value without the unit suffix, in Swedish notation.
+     * @param {number} cm
+     * @returns {string}
+     */
+    function scale_fmtCmVal(cm) {
+        const rounded = Math.round(cm * SCALE_ROUND) / SCALE_ROUND;
+        if (rounded % 1 === 0) return `${rounded}`;
+        return rounded.toFixed(3).replace('.', ',');
+    }
+
+    /**
      * Format a centimetre value in Swedish notation (comma decimal, 3 dp for fractions).
      * @param {number} cm
      * @returns {string}
      */
     function scale_fmtCm(cm) {
-        const rounded = Math.round(cm * 1000) / 1000;
-        if (rounded % 1 === 0) return `${rounded} cm`;
-        return `${rounded.toFixed(3).replace('.', ',')} cm`;
+        return `${scale_fmtCmVal(cm)} cm`;
     }
 
     /**
