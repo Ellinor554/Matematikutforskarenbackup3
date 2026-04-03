@@ -2256,7 +2256,7 @@
 
         const inputField = document.createElement('input');
         inputField.type = 'number';
-        inputField.min = '1'; inputField.max = '179'; inputField.step = '1';
+        inputField.min = '1'; inputField.max = '180'; inputField.step = '1';
         inputField.style.cssText = 'width:56px;border:1.5px solid #d6d4d0;border-radius:8px;padding:3px 6px;font-size:13px;font-weight:700;color:#4a4b50;text-align:center;outline:none;font-family:Nunito,sans-serif;';
 
         const degSign = document.createElement('span');
@@ -2283,13 +2283,14 @@
         }
 
         function getCategory(deg) {
-            if (deg === 90) return { text: 'Rät vinkel ∟', color: '#4f7c75', bg: 'rgba(139,179,156,0.22)' };
-            if (deg < 90)  return { text: 'Spetsig vinkel', color: '#5b80a5', bg: 'rgba(141,177,209,0.22)' };
-            return { text: 'Trubbig vinkel', color: '#a85c72', bg: 'rgba(213,139,153,0.22)' };
+            if (deg === 90)  return { text: 'Rät vinkel ∟', color: '#4f7c75', bg: 'rgba(139,179,156,0.22)' };
+            if (deg === 180) return { text: 'Rät linje —',  color: '#6b7280', bg: 'rgba(107,114,128,0.15)' };
+            if (deg < 90)   return { text: 'Spetsig vinkel', color: '#5b80a5', bg: 'rgba(141,177,209,0.22)' };
+            return            { text: 'Trubbig vinkel',  color: '#a85c72', bg: 'rgba(213,139,153,0.22)' };
         }
 
         function updateAngleTool(deg, skipInput) {
-            deg = Math.max(1, Math.min(179, Math.round(deg)));
+            deg = Math.max(1, Math.min(180, Math.round(deg)));
             angleDeg = deg;
             const rad = deg * Math.PI / 180;
             const ex = vx + rayLen * Math.cos(rad);
@@ -2330,12 +2331,12 @@
         // Input field handlers
         inputField.addEventListener('input', () => {
             const v = parseInt(inputField.value, 10);
-            if (!isNaN(v) && v >= 1 && v <= 179) updateAngleTool(v, true);
+            if (!isNaN(v) && v >= 1 && v <= 180) updateAngleTool(v, true);
         });
         inputField.addEventListener('blur', () => {
             let v = parseInt(inputField.value, 10);
             if (isNaN(v) || v < 1) v = 1;
-            if (v > 179) v = 179;
+            if (v > 180) v = 180;
             updateAngleTool(v, false);
             inputField.style.borderColor = '#d6d4d0';
         });
@@ -2355,7 +2356,7 @@
                 const dx = mx - vx;
                 const dy = vy - my; // invert y (SVG y-axis goes down)
                 let deg = Math.atan2(dy, dx) * 180 / Math.PI;
-                deg = Math.max(1, Math.min(179, deg));
+                deg = Math.max(1, Math.min(180, deg));
                 deg = snapAngle(deg);
                 updateAngleTool(deg);
             }
@@ -2625,6 +2626,8 @@
             span.textContent = text;
             span.style.color = color || '#5b80a5';
             if (dimKey) {
+                span.dataset.dimKey = dimKey;
+                span.dataset.dimColor = color || '#5b80a5';
                 span.addEventListener('mouseenter', () => { span.style.color = '#dc2626'; calcGeo_highlight(el, dimKey, true); });
                 span.addEventListener('mouseleave', () => { span.style.color = color || '#5b80a5'; calcGeo_highlight(el, dimKey, false); });
             }
@@ -2800,7 +2803,7 @@
         const dimLine = svg.querySelector(`[data-dim="${dimKey}"]`);
         if (dimLine) {
             dimLine.style.stroke = on ? '#dc2626' : '';
-            dimLine.style.strokeWidth = on ? '3.5' : '';
+            dimLine.style.strokeWidth = on ? '5' : '';
             return;
         }
         // Fallback: highlight the whole shape outline for shapes without individual dim lines
@@ -2810,7 +2813,7 @@
             if (!shapeEl.dataset.origStroke) shapeEl.dataset.origStroke = shapeEl.getAttribute('stroke') || '#000000';
             if (!shapeEl.dataset.origFill)   shapeEl.dataset.origFill   = shapeEl.getAttribute('fill')   || '#ffffff';
             shapeEl.setAttribute('stroke', '#dc2626');
-            shapeEl.setAttribute('stroke-width', '4');
+            shapeEl.setAttribute('stroke-width', '5');
         } else {
             if (shapeEl.dataset.origStroke) shapeEl.setAttribute('stroke', shapeEl.dataset.origStroke);
             shapeEl.setAttribute('stroke-width', '2');
@@ -2955,6 +2958,20 @@
         });
         content.innerHTML = '';
         content.appendChild(frag);
+
+        // Re-attach hover listeners to cloned variable spans (cloneNode does not copy event listeners)
+        content.querySelectorAll('[data-dim-key]').forEach(span => {
+            const dimKey = span.dataset.dimKey;
+            const origColor = span.dataset.dimColor || '#5b80a5';
+            span.addEventListener('mouseenter', () => {
+                span.style.color = '#dc2626';
+                if (calcGeo_currentEl) calcGeo_highlight(calcGeo_currentEl, dimKey, true);
+            });
+            span.addEventListener('mouseleave', () => {
+                span.style.color = origColor;
+                if (calcGeo_currentEl) calcGeo_highlight(calcGeo_currentEl, dimKey, false);
+            });
+        });
     };
 
     // Legacy stubs (no longer used but keep switchView from breaking)
