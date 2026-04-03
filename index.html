@@ -5353,7 +5353,7 @@
     window.onload = initApp;
 
     // ===================== SKALA OCH MÅTT MODULE =====================
-    // All identifiers use the meas_ / scale_ prefix to avoid collisions.
+    // All identifiers use the scale_ prefix to avoid collisions.
 
     /** Grid cell size in pixels (1 cm at standard screen DPI). */
     const SCALE_CELL_PX = 40;
@@ -5425,6 +5425,14 @@
             '#5b80a5'         // fill colour – soft blue
         );
 
+        // Color of the scaled object reflects whether it is reduced, enlarged, or 1:1
+        const SCALE_COLOR_REDUCTION  = '#2E7D32';
+        const SCALE_COLOR_ENLARGEMENT = '#C62828';
+        const SCALE_COLOR_NEUTRAL    = '#5b80a5';
+        const scaledColor = scale_denominator > scale_numerator ? SCALE_COLOR_REDUCTION
+                          : scale_numerator   > scale_denominator ? SCALE_COLOR_ENLARGEMENT
+                          : SCALE_COLOR_NEUTRAL;
+
         // ── Right canvas (Ritning / Skala) ──
         scale_drawSide(
             document.getElementById('scale-canvas-right'),
@@ -5432,7 +5440,7 @@
             SCALE_OBJ_W_CM * factor,
             SCALE_OBJ_H_CM * factor,
             false,
-            scale_denominator > scale_numerator ? '#2E7D32' : (scale_numerator > scale_denominator ? '#C62828' : '#5b80a5')
+            scaledColor
         );
 
         // ── Update presentation overlay ──
@@ -5506,16 +5514,10 @@
 
         // Stroke
         ctx.shadowColor = 'transparent';
-        ctx.strokeStyle = fillColor;
-        ctx.lineWidth   = highlighted ? 3.5 : 2;
-        if (highlighted) {
-            ctx.setLineDash([]);
-            ctx.strokeStyle = '#f5a623';
-        } else {
-            ctx.setLineDash([]);
-        }
-        ctx.strokeRect(objX, objY, objW, objH);
         ctx.setLineDash([]);
+        ctx.lineWidth   = highlighted ? 3.5 : 2;
+        ctx.strokeStyle = highlighted ? '#f5a623' : fillColor;
+        ctx.strokeRect(objX, objY, objW, objH);
 
         // ── Dimension labels ──
         ctx.fillStyle  = highlighted ? '#c87800' : fillColor;
@@ -5550,7 +5552,7 @@
      */
     function scale_fmtCm(cm) {
         const rounded = Math.round(cm * 1000) / 1000;
-        return rounded % 1 === 0 ? `${rounded} cm` : `${parseFloat(rounded.toFixed(3))} cm`;
+        return rounded % 1 === 0 ? `${rounded} cm` : `${rounded.toFixed(3).replace(/\.?0+$/, '')} cm`;
     }
 
     /**
