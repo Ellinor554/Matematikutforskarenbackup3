@@ -4643,8 +4643,8 @@
         const infoEl = document.getElementById('vol-info-extra');
         if (infoEl) {
             if (volymMl > 0) {
-                const totalDl = (volymMl / 100).toLocaleString('sv-SE', { maximumFractionDigits: 1 });
-                const totalCl = Math.round(volymMl / 10).toLocaleString('sv-SE');
+                const totalDl = (volymMl / 100).toLocaleString('sv-SE', { maximumFractionDigits: 3 });
+                const totalCl = (volymMl / 10).toLocaleString('sv-SE', { maximumFractionDigits: 3 });
                 infoEl.innerHTML = `
                     ${formatLiters(volymMl)} =
                     <strong>${totalDl} dl</strong> =
